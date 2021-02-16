@@ -370,7 +370,7 @@ class Message extends Model
             default:
                 div.innerHTML = `
 
-                <div class="font-style _3DFk6 tail" >
+                <div class="font-style _3DFk6 tail">
                     <span class="tail-container"></span>
                     <span class="tail-container highlight"></span>
                     <div class="Tkt2p">

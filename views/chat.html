@@ -359,9 +359,9 @@
                                     </div>
                                 </button>
     
-                                <div class="_2cLHw">Procurar ou começar uma nova conversa</div>
+                                <div class="_2cLHw" id="input-search-contacts-placeholder">Procurar ou começar uma nova conversa</div>
                                 <label class="_2MSJr">
-                                    <input type="text" class="jN-F5 copyable-text selectable-text" data-tab="2" dir="auto" title="Procurar ou começar uma nova conversa"
+                                    <input type="text" id="input-search-contacts" class="jN-F5 copyable-text selectable-text" data-tab="2" dir="auto" title="Procurar ou começar uma nova conversa"
                                         value="">
                                 </label>
                             </div>
@@ -1052,9 +1052,14 @@
     <script src="https://www.gstatic.com/firebasejs/8.2.7/firebase-analytics.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.2.7/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.7/firebase-storage.js"></script>
     <script src="/res/site/src/util/ClassEvent.js"></script>
+    <script src="/res/site/src/util/Base64.js"></script>
     <script src="/res/site/src/Model/Model.js"></script>
+    <script src="/res/site/src/controller/ContactsController.js"></script>
+    <script src="/res/site/src/Model/Chat.js"></script>
     <script src="/res/site/src/Model/User.js"></script>
+    <script src="/res/site/src/util/Upload.js"></script>
     <script src="/res/site/src/Model/Message.js"></script>
     <script src="/res/site/src/util/Firebase.js"></script>
     <script src="/res/site/src/util/Format.js"></script>

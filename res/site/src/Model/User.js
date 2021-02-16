@@ -34,6 +34,7 @@ class User extends Model
 
     save()
     {
+
         return User.findByEmail(this.email).set(this.toJSON());
     }
 

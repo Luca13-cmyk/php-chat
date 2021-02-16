@@ -1056,7 +1056,8 @@ html[dir=rtl] ._2YdsD._2EEiy{
     margin-right:65px
 }
 html[dir] .message{
-    margin-bottom:12px
+    margin-bottom: 6px;
+    margin-top: 6px;
 }
 html[dir] .textsize-xxlarge .message{
     margin-bottom:18px
@@ -8904,7 +8905,7 @@ html[dir] ._2CORf ._12xX7{
     background-color:#d1ecbc
 }
 html[dir] .message-in ._2CORf ._12xX7 {
-    background-color: #F6F6F6
+    background-color: #F6F6F6;
 }
 ._3cMIj{
     color:rgba(0,0,0,.45);
@@ -16135,21 +16136,4 @@ html[dir=rtl] ._2ICcy:after{
 }
 #main {
     display:none;
-}
-._2oKVP{
-    display: flex;
-    justify-content: center;
-}
-#picture-camera
-{
-    height: 100%;
-    width: auto;
-    text-align: center;
-}
-.r4crx ._3m_5X {
-    
-    position: absolute;
-    right: 50%;
-    left: 50%;
-    transform: translate(-50%, 0)
 }

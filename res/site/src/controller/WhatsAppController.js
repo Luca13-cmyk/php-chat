@@ -4,25 +4,19 @@ class WhatsAppController {
     {
         this._firebase = new Firebase();
         this.initAuth();
-        // this.createUser();
         this.loadElements();
         this.elementsPrototype();
         this.initEvents();
+        this.checkNotifications();
+
 
     }
     initAuth()
     {
-        // "lucanegrette@hotmail.com", "caracas13"
-        // "hydena788@gmail.com", "caracas17"
 
         this._firebase.initAuth()
             .then(response =>{
-                // console.log("response", response.user.stsTokenManager.accessToken);
-
-                // this._firebase.updateUser("Luca Negrette", "https://lh3.googleusercontent.com/ogw/ADGmqu-K0Uxb76EpdLTV1qYs6hVnepP7ph_-sxvN79dgIA=s32-c-mo");
-                // Firebase.updateUserName("hydena");
-                // Firebase.updateUserPhoto("https://www.w3schools.com/w3images/avatar2.png");
-                console.log(response);
+                
 
                 this._user = new User(response.user.email);
 
@@ -57,6 +51,7 @@ class WhatsAppController {
 
                 this._user.save().then(()=>{
     
+
                     this.el.appContent.css({
                         display:'flex'
                     });
@@ -75,24 +70,29 @@ class WhatsAppController {
         
         this._user.on("contactschange", docs => {
 
+
             this.el.contactsMessagesList.innerHTML = '';
 
 
             docs.forEach(doc => {
 
+
                 let contact = doc.data();
+
 
                 let div = document.createElement("div");
 
                 div.className = 'contact-item';
-        
+                
+                div.id = btoa(contact.email);
+
                 div.innerHTML = `
             
                     <div class="dIyEr">
                         <div class="_1WliW" style="height: 49px; width: 49px;">
                             <img src="#" class="Qgzj8 gqwaM photo" style="display:none;">
                             <div class="_3ZW2E">
-                                <span data-icon="default-user" class="">
+                                <span data-icon="default-user" class="" >
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 212 212" width="212" height="212">
                                         <path fill="#DFE5E7" d="M106.251.5C164.653.5 212 47.846 212 106.25S164.653 212 106.25 212C47.846 212 .5 164.654.5 106.25S47.846.5 106.251.5z"></path>
                                         <g fill="#FFF">
@@ -116,19 +116,15 @@ class WhatsAppController {
                             <div class="_itDl">
                                 <span title="digitando…" class="vdXUe _1wjpf typing" style="display:none">digitando…</span>
         
-                                <span class="_2_LEW last-message">
+                                <span style='' class="_2_LEW last-message">
                                     <div class="_1VfKB">
-                                        <span data-icon="status-dblcheck" class="">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="18" height="18">
-                                                <path fill="#263238" fill-opacity=".4" d="M17.394 5.035l-.57-.444a.434.434 0 0 0-.609.076l-6.39 8.198a.38.38 0 0 1-.577.039l-.427-.388a.381.381 0 0 0-.578.038l-.451.576a.497.497 0 0 0 .043.645l1.575 1.51a.38.38 0 0 0 .577-.039l7.483-9.602a.436.436 0 0 0-.076-.609zm-4.892 0l-.57-.444a.434.434 0 0 0-.609.076l-6.39 8.198a.38.38 0 0 1-.577.039l-2.614-2.556a.435.435 0 0 0-.614.007l-.505.516a.435.435 0 0 0 .007.614l3.887 3.8a.38.38 0 0 0 .577-.039l7.483-9.602a.435.435 0 0 0-.075-.609z"></path>
-                                            </svg>
-                                        </span>
+                                        
                                     </div>
-                                    <span dir="ltr" class="_1wjpf _3NFp9">${contact.lastMessage}</span>
+                                    <span dir="ltr" class="_1wjpf _3NFp9"></span>
                                     <div class="_3Bxar">
                                         <span>
                                             <div class="_15G96">
-                                                <span class="OUeyt messages-count-new" style="display:none;">1</span>
+                                                <span class="OUeyt messages-count-new" style="display:none">Nova</span>
                                             </div>
                                     </span></div>
                                     </span>
@@ -144,28 +140,26 @@ class WhatsAppController {
                     let img = div.querySelector(".photo");
                     img.src = contact.photo;
                     img.show();
+                    
+
+                    
                 }
 
                 div.on("click", e => {
 
-                    // console.log(contact.chatId);
-                    // this.setActiveChat(contact);
-                    this.el.activeName.innerHTML = contact.name;
-                    this.el.activeStatus.innerHTML = contact.status;
                     
-                    if (contact.photo)
-                       
-                    {
-                        let img = this.el.activePhoto;
-                        img.src = contact.photo;
-                        img.show();
-                    }
 
-                    this.el.home.hide();
-                    this.el.main.css({
-                        display:"flex"
-                    });
-                     
+
+                    this.setActiveChat(contact);
+
+                    if (div.id === btoa(sessionStorage.newMessage))
+                    {
+                        div.querySelector(".messages-count-new").hide();
+                        sessionStorage.newMessage = '';
+                    }
+                    
+
+
 
                 });
 
@@ -175,22 +169,224 @@ class WhatsAppController {
 
         });
 
+
         this._user.getContacts();
         
     }
 
-
-    createUser()
+    checkNotifications()
     {
-        this._firebase.createUser("hydena788@gmail.com", "caracas17")
-            .then(response =>{
-                console.log("response", response);
-            })
-            .catch(err=>{
-                console.log(err);
-            }); 
+        if (typeof Notification == 'function')
+        {
+            if (Notification.permission !== 'granted')
+            {
+                this.el.alertNotificationPermission.show();
+            }
+            else {
+                this.el.alertNotificationPermission.hide();
+
+            }
+            this.el.alertNotificationPermission.on("click", e => {
+
+                Notification.requestPermission(permission => {
+                    if (permission === 'granted')
+                    {
+                        this.el.alertNotificationPermission.hide();
+                        console.info("notification granted");
+
+                    }
+                });
+
+            });
+        }
+    }
+
+    notification(data) {
+
+        if (!this._active && Notification.permission === 'granted') {
+
+            let n = new Notification(this._contactActive.name, {
+                icon: this._contactActive.photo,
+                body: data.content
+            });
+
+            let nSound = new Audio('/res/site/audio/alert.mp3');
+
+            nSound.currentTime = 0;
+            nSound.play();
+
+            setTimeout(() => {
+
+                if (n) n.close();
+
+            }, 3000);
+
+        }
 
     }
+
+    setActiveChat(contact)
+    {
+        
+
+
+
+        this._user.on("contactschange", docs=>{
+
+            docs.forEach(doc =>{
+                var contactDoc = doc.data();
+                if (contact.email === contactDoc.email)
+                {
+                    
+                    this.el.activeName.innerHTML = contactDoc.name;
+                    this.el.activeStatus.innerHTML = contactDoc.status;
+            
+            
+            
+                    if (contact.photo)
+                    {
+                        let img = this.el.activePhoto;
+                        img.src = contactDoc.photo;
+                        img.show();
+            
+                    }
+                }
+            })
+
+        });
+
+        if (this._contactActive) {
+            Message.getRef(this._contactActive.chatId).onSnapshot(() => { });
+        }
+
+        this.el.activeName.innerHTML = contact.name;
+        this.el.activeStatus.innerHTML = contact.status;
+
+        if (contact.photo) {
+            let img = this.el.activePhoto;
+            img.src = contact.photo;
+            img.show();
+        }
+
+        this._contactActive = contact;
+
+        
+
+
+
+        this._messagesReceived = [];
+
+        Message.getRef(this._contactActive.chatId).orderBy("timeStamp").onSnapshot(docs => {
+
+            let scrollTop = this.el.panelMessagesContainer.scrollTop;
+            let scrollTopMax = (this.el.panelMessagesContainer.scrollHeight - 
+            this.el.panelMessagesContainer.offsetHeight);
+            let autoScroll = (scrollTop >= scrollTopMax);
+
+            this.el.panelMessagesContainer.innerHTML = '';
+            
+            
+            docs.forEach(docMsg => {
+
+
+                let data = docMsg.data();
+                // console.log('[FROM]', data.from);
+                // console.log('[THIS.EMAIL]', this._user.email);
+                // console.log('[CONTACT EMAIL]', this._contactActive.email);
+
+
+                if (data.from === this._user.email || data.from == this._contactActive.email)
+                {
+                    // console.log("igual");
+
+
+
+                    if (!this._messagesReceived.filter(msg => { return (msg === docMsg.id) }).length) {
+                        this._messagesReceived.push(docMsg.id);
+                        this.notification(data);
+                    }
+                    let message = new Message();
+
+                    message.fromJSON(data);
+
+                    let messageEl = message.getViewElement((data.from === this._user.email));
+
+                    this.el.panelMessagesContainer.appendChild(messageEl);
+
+                    if (data.from !== this._user.email) {
+
+                        docMsg.ref.set({
+                            status: 'read'
+                        }, {
+                                merge: true
+                            });
+
+                        }
+                        if (data.type === 'contact') {
+
+                            messageEl.querySelector('.btn-message-send').on('click', e => {
+
+
+                                Chat.createIfNotExists(this._user.email, data.content.email).then(chat => {
+
+                                    let contact = new User(data.content.email);
+
+                                    contact.on('datachange', userData => {
+
+                                        contact.chatId = chat.id;
+
+                                        this._user.addContact(contact);
+
+                                        this._user.chatId = chat.id;
+
+                                        contact.addContact(this._user);
+
+                                        this.setActiveChat(contact);
+
+                                    });
+
+                                });
+
+                            });
+
+                            
+
+                }
+
+                } else {
+
+                    // console.log("diferente");
+                    document.getElementById(btoa(this._contactActive.email)).click();
+                    
+                    sessionStorage.newMessage = data.from;
+                    document.getElementById(btoa(data.from)).querySelector(".messages-count-new").show();
+
+                }
+
+            });
+            if (autoScroll)
+            {
+                this.el.panelMessagesContainer.scrollTop = 
+                (this.el.panelMessagesContainer.scrollHeight - 
+                this.el.panelMessagesContainer.offsetHeight);
+            } else {
+
+                this.el.panelMessagesContainer.scrollTop = scrollTop;
+            }
+            
+
+        });
+
+        this.el.home.hide();
+        this.el.main.css({
+            display: 'flex'
+        });
+
+
+        
+    }
+
+
     loadElements()
     {
         this.el = {};
@@ -278,6 +474,23 @@ class WhatsAppController {
     
     initEvents()
     {
+
+
+        this.el.inputSearchContacts.on("input", e => {
+
+            if (this.el.inputSearchContacts.value.length > 0)
+            {
+                this.el.inputSearchContactsPlaceholder.hide();
+            } else 
+            {
+                this.el.inputSearchContactsPlaceholder.show();
+
+            }
+
+            this._user.getContacts(this.el.inputSearchContacts.value);
+
+        });
+
         this.el.myPhoto.on("click", e=> {
 
             this.closeAllLeftPanel();
@@ -324,11 +537,35 @@ class WhatsAppController {
         });
         this.el.inputProfilePhoto.on("change", e=>{ // Editar photo do perfil
 
-            // console.log(this.el.inputProfilePhoto.files);
-            [...this.el.inputProfilePhoto.files].forEach(file=>{
+            if (this.el.inputProfilePhoto.files.length > 0)
+            {
+                let file = this.el.inputProfilePhoto.files[0];
 
-                console.log(file);
-            });
+                Upload.send(file, this._user.email).then(url =>{
+
+                    this._user.photo = url;
+                    this._user.save();
+                    // Firebase.db().collection("/users").where('email', '==', this._user.email).collection("contacts")
+                    Firebase.db().collection("/users").doc(this._user.email).collection("contacts")
+                    .get()
+                    .then(data=>{
+                        data.forEach(doc=>{
+
+                            var email = doc.data().email;
+                            Firebase.db().collection("/users").doc(email).collection("contacts").doc(btoa(this._user.email))
+                            .set({
+                               photo: url 
+                            }, {
+                                merge: true
+                            });
+                            // console.log(email, " => ", doc.data());
+
+                        });
+                    });
+                    Firebase.updateUserPhoto(url);
+
+                });
+            }
 
         });
         this.el.inputNamePanelEditProfile.on("keypress", e=>{
@@ -347,7 +584,27 @@ class WhatsAppController {
 
             this._user.name = this.el.inputNamePanelEditProfile.innerHTML;
 
+            // this._user.save();
             this._user.save().then(()=>{ // Salvando no firestore
+
+
+                Firebase.db().collection("/users").doc(this._user.email).collection("contacts")
+                    .get()
+                    .then(data=>{
+                        data.forEach(doc=>{
+
+                            var email = doc.data().email;
+
+                            Firebase.db().collection("/users").doc(email).collection("contacts").doc(btoa(this._user.email))
+                            .set({
+                               name: this._user.name 
+                            }, {
+                                merge: true
+                            });
+                            // console.log(email, " => ", doc.data());
+
+                        });
+                    });
 
                 Firebase.updateUserName(this._user.name); // Salvando no Auth
 
@@ -366,14 +623,28 @@ class WhatsAppController {
 
             contact.on("datachange", data=>{
 
+                console.log("mudou");
+                console.log(data.email, contact.email);
+
                 if (data.name)
                 {
+                    Chat.createIfNotExists(this._user.email, contact.email).then(chat=>{
 
-                    this._user.addContact(contact).then(()=>{
+                        console.log(chat);
+                        contact.chatId = chat.id;
 
-                        this.el.btnClosePanelAddContact.click();
-                        console.log("contato adicionado");
+                        this._user.chatId = chat.id;
+
+                        contact.addContact(this._user);
+
+                        this._user.addContact(contact).then(()=>{
+    
+                            this.el.btnClosePanelAddContact.click();
+                            console.log("contato adicionado");
+                        });
+
                     });
+
 
 
                 } else 
@@ -414,10 +685,11 @@ class WhatsAppController {
         });
         this.el.inputPhoto.on("change", e=>{
 
-            console.log(this.el.inputPhoto.files);
+            // console.log(this.el.inputPhoto.files);
+
             [...this.el.inputPhoto.files].forEach(file=>{
 
-                console.log(file);
+                Message.sendImage(this._contactActive.chatId, this._user.email, file);
             });
 
         });
@@ -464,7 +736,57 @@ class WhatsAppController {
         });
         this.el.btnSendPicture.on("click", e=>{
 
-            console.log(this.el.pictureCamera.src);
+            // console.log(this.el.pictureCamera.src);
+            this.el.btnSendPicture.disabled = true;
+
+
+            let regex = /^data:(.+);base64,(.*)$/;
+            let result = this.el.pictureCamera.src.match(regex);
+            mimeType = result[1];
+            let ext = mimeType.split('/')[1];
+            let filename = `camera${Date.now()}.${ext}`;
+
+            let picture = new Image();
+            picture.src = this.el.pictureCamera.src;
+            picture.onload = e => {
+
+                let canvas = document.createElement("canvas");
+                let context = canvas.getContext("2d");
+
+                canvas.width = picture.width;
+                canvas.height = picture.height;
+
+                context.translate(picture.width, 0);
+                context.scale(-1, 1);
+
+                context.drawImage(picture, 0, 0, canvas.width, canvas.height);
+
+                fetch(canvas.toDataURL(mimeType))
+                .then(res => { return res.arrayBuffer() })
+                .then(buffer => { return new File([buffer], filename, { type: mimeType }); })
+                .then(file => {
+    
+                    Message.sendImage(this._contactActive.chatId, this._user.email, file);
+    
+                    this.el.btnSendPicture.disabled = false;
+
+                    this.closeAllMainPanel();
+                    this._camera.stop();
+                    this.el.btnReshootPanelCamera.hide();
+                    this.el.pictureCamera.hide();
+                    this.el.videoCamera.show();
+                    this.el.containerSendPicture.hide();
+                    this.el.containerTakePicture.show();
+                    this.el.panelMessagesContainer.show();
+
+    
+                });
+
+
+            }
+
+
+            console.log(result);
 
         });
         this.el.btnAttachDocument.on("click", e=>{
@@ -558,41 +880,53 @@ class WhatsAppController {
 
             console.log("send document");
 
-            // let file = this.el.inputDocument.files[0];
-            // console.log("file type", file.type);
-            // let base64 = this.el.imgPanelDocumentPreview.src;
+            let file = this.el.inputDocument.files[0];
+            console.log("file type", file.type);
+            let base64 = this.el.imgPanelDocumentPreview.src;
 
-            // if (file.type === 'application/pdf' || 'application/wps-office.pdf')
-            // {
+            if (file.type === 'application/pdf' || 'application/wps-office.pdf')
+            {
 
-            //     Base64.toFile(base64).then(filePreview => {
+                Base64.toFile(base64).then(filePreview => {
 
-            //         Message.sendDocument(this._contactActive.chatId,
-            //             this._user.email,
-            //             file,
-            //             filePreview, this.el.infoPanelDocumentPreview.innerHTML);
-            //     });
+                    Message.sendDocument(this._contactActive.chatId,
+                        this._user.email,
+                        file,
+                        filePreview, this.el.infoPanelDocumentPreview.innerHTML);
+                });
 
-            // } else 
-            // {
-            //     Message.sendDocument(this._contactActive.chatId,
-            //         this._user.email,
-            //         file);
-            // }
+            } else 
+            {
+                Message.sendDocument(this._contactActive.chatId,
+                    this._user.email,
+                    file);
+            }
 
-            // this.el.btnClosePanelDocumentPreview.click();
+            this.el.btnClosePanelDocumentPreview.click();
 
            
 
         });
         this.el.btnAttachContact.on("click", e=>{
 
-            this.el.modalContacts.show();
+            this._contactsController = new ContactsController(this.el.modalContacts, this._user);
+
+            this._contactsController.on("select", contact => {
+
+                Message.sendContact(
+                    this._contactActive.chatId,
+                    this._user.email,
+                    contact);
+
+            });
+
+            this._contactsController.open();
 
         });
         this.el.btnCloseModalContacts.on("click", e => {
 
-            this.el.modalContacts.hide();
+            
+            this._contactsController.close();
             
 
 
@@ -628,28 +962,27 @@ class WhatsAppController {
 
 
         });
-        this.el.btnFinishMicrophone.on("click", e => {
+        this.el.btnFinishMicrophone.on('click', event => {
 
-            // this._microPhoneController.on("recorded", (file, metadata) => {
+            this._microPhoneController.on("recorded", (file, metadata) => {
 
-            //     console.log("file2*********************", file);
+                console.log("file2*********************", file);
 
-            //     Message.sendAudio(
+                Message.sendAudio(
 
-            //         this._contactActive.chatId,
-            //         this._user.email,
-            //         file,
-            //         metadata,
-            //         this._user.photo
-            //     );
+                    this._contactActive.chatId,
+                    this._user.email,
+                    file,
+                    metadata,
+                    this._user.photo
+                );
 
-            // });
-
+            });
             this._microPhoneController.stopRecorder();
             
 
             this.closeRecordMicrophone();
-            
+
         });
         this.el.inputText.on("keypress", e => {
 
@@ -678,21 +1011,12 @@ class WhatsAppController {
             }
 
         });
-        this.el.btnSend.on("click", e => {
+        this.el.btnSend.on('click', event => {
 
-            console.log("send");
+            Message.send(this._contactActive.chatId, this._user.email, 'text', this.el.inputText.innerHTML);
 
-            // Message.send(
-            //     this._contactActive.chatId,
-            //     this._user.email,
-            //     'text',
-            //     this.el.inputText.innerHTML,
-            //     );
-
-            // this.el.inputText.innerHTML = '';
-
-            // this.el.panelEmojis.removeClass("open");
-
+            this.el.inputText.innerHTML = '';
+            this.el.panelEmojis.removeClass('open');
 
         });
         this.el.btnEmojis.on("click", e => {
